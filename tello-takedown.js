@@ -42,11 +42,11 @@ onEvent('mod.started', function(event){
 
 onEvent('wifi.ap.new', function(event){
     var ap = event.data;
-    log('Access point detected: ' + ap.hostname + ' @ ' + ap.mac + ' (' + ap.vendor + ')');
+    log('📡 Access point detected: ' + ap.hostname + ' @ ' + ap.mac + ' (' + ap.vendor + ')');
     //log(JSON.stringify(ap));
-    if(ap.hostname.startsWith('Unhack')){
-        log('🚁 Drone detected on channel ' + ap.channel);
-        run('wifi.recon.channel 1,2,3,4,5,6,7,8,9,10,11');
+    if(ap.hostname.startsWith('TELLO-')){
+        log('🚁 Drone identified, homing in on channel ' + ap.channel);
+        run('wifi.recon.channel ' + ap.channel);
     }
 });
 
