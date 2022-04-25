@@ -1,3 +1,5 @@
+log('📝 Script tello-takedown started')
+
 onEvent('wifi.client.handshake', function(event){
     var data = event.data;
     var gps = session.GPS; // session is a global object with all the session data
