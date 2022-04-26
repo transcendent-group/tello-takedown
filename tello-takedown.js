@@ -85,7 +85,7 @@ onEvent('wifi.client.handshake', function(event){
 
         var cmd;
 
-        log('🪄 Converting packets to 22000 format');
+        log('🪄 Converting packets to hashcat 22000 format');
         //TODO: filter on ap mac address, if possible
         cmd = hcxpcapngtool + ' -o ' + hashcatFormat22000FileName + ' -all' + ' ' + handshakesFileName;
         log_debug('Command: ' + cmd);
@@ -97,12 +97,15 @@ onEvent('wifi.client.handshake', function(event){
         log_debug('Command: ' + cmd);
         run('!'+cmd);
 
+        var key;
         //TODO: Monitor output file
 
-        var key;
-
         log('🔑 Found: '+ key);
+        cmd = 'associate with ap';
+        run('!'+cmd);
 
         log('💎 Taking down 🚁 and executing code');
+        cmd = 'go ...';
+        run('!'+cmd);
     }
 });
