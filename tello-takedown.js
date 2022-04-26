@@ -96,6 +96,8 @@ onEvent('wifi.client.handshake', function(event){
         cmd += ' -o ' + hashcatOutputFileName;
         cmd += ' ' + hashcatFormat22000FileName;
 
-        
+        log('🔑 Found');
+
+        log('💎 Logging into 🚁, and executing code');
     }
 });
