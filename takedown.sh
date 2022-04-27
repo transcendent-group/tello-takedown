@@ -5,8 +5,16 @@ $psk = $2
 
 echo $1
 
-associate
+networksetup -setairportnetwork en0 $1 $()
 
-wait for keyboard input
+echo "Press any key to continue"
+while [ true ] ; do
+read -t 3 -n 1
+if [ $? = 0 ] ; then
+exit ;
+else
+echo "waiting for the keypress"
+fi
+done
 
 go run 
