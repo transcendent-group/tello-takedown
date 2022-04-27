@@ -1,11 +1,8 @@
-echo takedown
+hostname = $1
+psk_file = $2
+psk = $(cat $psk_file | head -1 | cut -d : -f 2)
 
-$hostname = $1
-$psk = $2
-
-echo $1
-
-networksetup -setairportnetwork en0 $1 $()
+networksetup -setairportnetwork en0 $hostname $psk
 
 echo "Press any key to continue"
 while [ true ] ; do
